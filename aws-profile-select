@@ -2,11 +2,7 @@
 
 /**
  * todo:
- * - make a .aws-profile-select app folder in home
- * - store config file in the app folder
- * - use $PPID to identify session, store a session.$PPID in the app folder for the profile for the current bash session
  * - try to write a trap func EXIT to clean up the session file when the bash session ends
- * -
  */
 
 const {AWSProfileSelect} = require('./AWSProfileSelect'),
@@ -14,10 +10,6 @@ const {AWSProfileSelect} = require('./AWSProfileSelect'),
         .usage('Ensure that the correct profile is selected for all AWS CLI commands.\nUsage: $0')
         .alias('H', 'help')
         .describe('help', 'Print usage and quit.')
-        .describe('install', 'Create a symlink for this tool that replaces the current AWS CLI, will ask for permissions elevation')
-        .boolean('install')
-        .describe('uninstall', 'Remove the symlink, and replace the original AWS CLI, will ask for permissions elevation')
-        .boolean('uninstall')
         .alias('p', 'profile')
         .describe('profile', 'Selected profile, or omit to select during execution.'),
     argv = yargs.argv;
