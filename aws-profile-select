@@ -9,7 +9,7 @@
  * -
  */
 
-const { AWSProfileSelect } = require('./AWSProfileSelect'),
+const {AWSProfileSelect} = require('./AWSProfileSelect'),
     yargs = require('yargs')
         .usage('Ensure that the correct profile is selected for all AWS CLI commands.\nUsage: $0')
         .alias('H', 'help')

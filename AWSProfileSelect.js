@@ -1,6 +1,5 @@
 const fs = require('fs'),
     exec = require('child_process').execSync,
-    nconf = require('nconf'),
     select = require('select-shell')({
         pointer: ' ▸ ',
         multiSelect: false,
@@ -9,22 +8,23 @@ const fs = require('fs'),
         msgCancelColor: 'red'
     });
 
+function getppid() {
+    return (require('child_process').execSync(`ps -p ${process.pid} -o ppid=`) + '').split('\n')[0]
+}
+
 const DEFAULTS = {
     PROFILE: 'default',
     CLI_PROXY_SUFFIX: '-cli-for-profile-select',
     SELF: __filename,
-    HOME: process.env.HOME
+    HOME: process.env.HOME,
+    APP_DIR: `${process.env.HOME}/.aws-profile-select`,
+    CONFIG: `${process.env.HOME}/.aws-profile-select/config`,
+    SESSION_FILE: `${process.env.HOME}/.aws-profile-select/session.${getppid()}`
 };
 
 class AWSProfileSelect {
     constructor(options) {
-        this.selectedProfile = DEFAULTS.PROFILE;
-
-        nconf.argv().env();
-
-        nconf.file({
-            file: `${DEFAULTS.HOME}/.aws/aws-profile-select.json`
-        });
+        this.sessionFile = DEFAULTS.SESSION_FILE;
 
         if (options.install) {
             this.install();
@@ -34,8 +34,16 @@ class AWSProfileSelect {
             this.uninstall();
         }
 
-        if (!fs.existsSync(`${DEFAULTS.HOME}/.aws/.aws_profile_select`)) {
+        if (options.profile) {
+            this.profile = options.profile;
+        } else if(fs.existsSync(this.sessionFile)) {
+            this.profile = fs.readFileSync(this.sessionFile);
+        }
+
+        if (!this.profile && !fs.existsSync(`${DEFAULTS.HOME}/.aws/.aws_profile_select`)) {
             this.selectProfile();
+        } else {
+            this.run();
         }
     }
 
@@ -92,7 +100,7 @@ class AWSProfileSelect {
     }
 
     run() {
-        var command = `env AWS_PROFILE=${this.selectedProfile} aws cloudformation list-exports`;
+        var command = `env AWS_PROFILE=${this.profile} aws cloudformation list-exports`;
         console.log(`running ${command}`);
         exec(command, {stdio: [0, 1, 2]});
 
@@ -109,8 +117,16 @@ class AWSProfileSelect {
         });
 
         select.on('select', function (options) {
-            this.selectedProfile = options[0].value;
-            console.log(`Selected profile ${this.selectedProfile}`);
+            this.profile = options[0].value;
+
+            if(!fs.existsSync(DEFAULTS.APP_DIR)) {
+                fs.mkdirSync(DEFAULTS.APP_DIR, 0o700);
+            }
+
+            fs.writeFileSync(this.sessionFile, this.profile, {mode: 0o700});
+
+            console.log(`Selected profile ${this.profile}`);
+
             this.run();
         }.bind(this));
 
@@ -119,6 +135,16 @@ class AWSProfileSelect {
         }.bind(this));
 
         select.list();
+    }
+
+    /**
+     * Returns the parent pid for the current process (not super slick, but most reliable way I could find)
+     *
+     * Also see https://github.com/nodejs/node/issues/14957
+     * @returns Integer parent pid
+     */
+    static getSessionID() {
+        return getppid();
     }
 }
 

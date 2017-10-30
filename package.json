@@ -1,7 +1,7 @@
 {
   "name": "aws-profile-select",
   "version": "0.0.1",
-  "description": "Ensure a profile is selected for the current bash session",
+  "description": "Ensure an AWS profile is selected for the current bash session",
   "main": "aws-profile-select",
   "bin": {
     "aws-profile-select": "./aws-profile-select"
@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nconf": "^0.8.5",
     "select-shell": "^1.0.0",
     "yargs": "^10.0.3"
   }
