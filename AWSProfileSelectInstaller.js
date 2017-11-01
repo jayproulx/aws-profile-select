@@ -1,8 +1,8 @@
-const exec = require('child_process').execSync;
+const exec = require('child_process').execSync,
+    { AWSProfileSelect, proxy } = require("./aws");
 
 const DEFAULTS = {
     CLI_PROXY_SUFFIX: '-cli-for-profile-select',
-    SELF: __filename,
     HOME: process.env.HOME
 };
 
@@ -27,7 +27,7 @@ class AWSProfileSelectInstaller {
         return cli;
     }
 
-    get proxy() {
+    get proxyCopy() {
         // todo: reference this after it's been fetched rather than fetching again
 
         return `${this.cli}${DEFAULTS.CLI_PROXY_SUFFIX}`;
@@ -40,11 +40,11 @@ class AWSProfileSelectInstaller {
             console.warn("Please install AWS CLI first");
         }
 
-        console.log(`I would move ${this.cli} to ${this.cli}-cli-for-profile-select and link aws to ${DEFAULTS.SELF}`);
+        console.log(`I would move ${this.cli} to ${this.cli}-cli-for-profile-select and link aws to ${proxy}`);
         // exec(`mv ${this.cli} ${this.proxy}`);
-        // exec(`ln -s ${this.cli} ${DEFAULTS.SELF}`);
-        console.log(`# mv ${this.cli} ${this.proxy}`);
-        console.log(`# ln -s ${this.cli} ${DEFAULTS.SELF}`);
+        // exec(`ln -s ${this.cli} ${proxy}`);
+        console.log(`# mv ${this.cli} ${this.proxyCopy}`);
+        console.log(`# ln -s ${this.cli} ${proxy}`);
 
         process.exit(0);
     }
@@ -55,16 +55,16 @@ class AWSProfileSelectInstaller {
             process.exit(1);
         }
 
-        if (!this.proxy) {
+        if (!this.proxyCopy) {
             console.warn("AWS CLI not proxied");
             process.exit(1);
         }
 
-        console.log(`I would remove ${this.cli}, and move ${this.proxy} back to ${this.cli}`);
+        console.log(`I would remove ${this.cli}, and move ${this.proxyCopy} back to ${this.cli}`);
         // exec(`rm ${this.cli}`);
         // exec(`mv ${this.proxy} ${this.cli}`);
         console.log(`# rm ${this.cli}`);
-        console.log(`# mv ${this.proxy} ${this.cli}`);
+        console.log(`# mv ${this.proxyCopy} ${this.cli}`);
 
         process.exit(0);
     }

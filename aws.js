@@ -6,6 +6,7 @@
  */
 
 const {AWSProfileSelect} = require('./AWSProfileSelect'),
+    {AWSProfileSelectInstaller} = require('./AWSProfileSelectInstaller'),
     yargs = require('yargs')
         .usage('Ensure that the correct profile is selected for all AWS CLI commands.\nUsage: $0')
         .alias('H', 'help')
@@ -14,6 +15,6 @@ const {AWSProfileSelect} = require('./AWSProfileSelect'),
         .describe('profile', 'Selected profile, or omit to select during execution.'),
     argv = yargs.argv;
 
-new AWSProfileSelect(argv);
-
+exports.proxy = __filename;
 exports.AWSProfileSelect = AWSProfileSelect;
+exports.AWSProfileSelectInstaller = AWSProfileSelectInstaller;

@@ -4,7 +4,8 @@
   "description": "Ensure an AWS profile is selected for the current bash session",
   "main": "aws-profile-select",
   "bin": {
-    "aws-profile-select": "./aws-profile-select"
+    "aws-profile-select": "./aws.js",
+    "aws-profile-select-installer": "./installer.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,5 +15,8 @@
   "dependencies": {
     "select-shell": "^1.0.0",
     "yargs": "^10.0.3"
+  },
+  "devDependencies": {
+    "mocha": "^4.0.1"
   }
 }

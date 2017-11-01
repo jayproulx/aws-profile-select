@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const {AWSProfileSelect} = require('./AWSProfileSelect'),
+const {proxy, AWSProfileSelectInstaller} = require('./aws'),
     yargs = require('yargs')
         .usage('Ensure that the correct profile is selected for all AWS CLI commands.\nUsage: $0')
         .alias('H', 'help')
@@ -12,5 +12,3 @@ const {AWSProfileSelect} = require('./AWSProfileSelect'),
     argv = yargs.argv;
 
 new AWSProfileSelectInstaller(argv);
-
-exports.AWSProfileSelectInstaller = AWSProfileSelectInstaller;

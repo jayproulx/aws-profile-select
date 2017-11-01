@@ -8,33 +8,31 @@ const fs = require('fs'),
         msgCancelColor: 'red'
     });
 
-function getppid() {
-    return (require('child_process').execSync(`ps -p ${process.pid} -o ppid=`) + '').split('\n')[0]
-}
-
-const DEFAULTS = {
-    PROFILE: 'default',
-    HOME: process.env.HOME,
-    APP_DIR: `${process.env.HOME}/.aws-profile-select`,
-    CONFIG: `${process.env.HOME}/.aws-profile-select/config`,
-    SESSION_FILE: `${process.env.HOME}/.aws-profile-select/session.${getppid()}`
-};
-
 class AWSProfileSelect {
     constructor(options) {
-        this.sessionFile = DEFAULTS.SESSION_FILE;
-
         if (options.profile) {
             this.profile = options.profile;
-        } else if(fs.existsSync(this.sessionFile)) {
-            this.profile = fs.readFileSync(this.sessionFile);
+        } else if (fs.existsSync(AWSProfileSelect.sessionFile)) {
+            this.profile = fs.readFileSync(AWSProfileSelect.sessionFile);
         }
 
-        if (!this.profile && !fs.existsSync(`${DEFAULTS.HOME}/.aws/.aws_profile_select`)) {
+        if (!this.profile && !fs.existsSync(`${AWSProfileSelect.userHome}/.aws/.aws_profile_select`)) {
             this.selectProfile();
         } else {
             this.run();
         }
+    }
+
+    static get userHome() {
+        return process.env.HOME;
+    }
+
+    static get sessionFile() {
+        return `${process.env.HOME}/.aws-profile-select/session.${AWSProfileSelect.getSessionID()}`;
+    }
+
+    static get appDir() {
+        return `${process.env.HOME}/.aws-profile-select`;
     }
 
     get cli() {
@@ -48,16 +46,18 @@ class AWSProfileSelect {
     }
 
     run() {
-        var args = process.argv.splice(2, process.argv.length-1);
-        var command = `env AWS_PROFILE=${this.profile} ${this.cli} ${args.join(' ')}`;
+        var args = process.argv.splice(2, process.argv.length - 1).join(' ');
+        var command = `env AWS_PROFILE=${this.profile} ${this.cli} ${args}`;
+
         console.log(`${command}`);
+
         exec(command, {stdio: [0, 1, 2]});
 
         process.exit(0);
     }
 
     selectProfile() {
-        var credentials = fs.readFileSync(`${DEFAULTS.HOME}/.aws/credentials`, 'utf-8');
+        var credentials = fs.readFileSync(`${AWSProfileSelect.userHome}/.aws/credentials`, 'utf-8');
 
         var profilesRegex = /\[\w+]/g;
 
@@ -68,11 +68,11 @@ class AWSProfileSelect {
         select.on('select', function (options) {
             this.profile = options[0].value;
 
-            if(!fs.existsSync(DEFAULTS.APP_DIR)) {
-                fs.mkdirSync(DEFAULTS.APP_DIR, 0o700);
+            if (!fs.existsSync(AWSProfileSelect.appDir)) {
+                fs.mkdirSync(AWSProfileSelect.appDir, 0o700);
             }
 
-            fs.writeFileSync(this.sessionFile, this.profile, {mode: 0o700});
+            fs.writeFileSync(AWSProfileSelect.sessionFile, this.profile, {mode: 0o700});
 
             this.run();
         }.bind(this));
@@ -91,7 +91,7 @@ class AWSProfileSelect {
      * @returns Integer parent pid
      */
     static getSessionID() {
-        return getppid();
+        return (require('child_process').execSync(`ps -p ${process.pid} -o ppid=`) + '').split('\n')[0];
     }
 }
 
